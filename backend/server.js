@@ -15,9 +15,14 @@ const app = express();
 app.use(express.json());
 
 app.use(cors({
-  origin: ["http://localhost:3000", "http://localhost:3001"], // React app port
+  origin: [
+    "http://localhost:3000", "http://localhost:3001",
+    "busify-deployment.vercel.app"
+  ],
+  methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true
 }));
+
 
 app.use(session({
   secret: "busbooking_secret",
