@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import axios from "../api/axios";
 
 const UserDashboard = () => {
   const username = localStorage.getItem("username");
@@ -8,16 +9,10 @@ const UserDashboard = () => {
   useEffect(() => {
     const fetchBookings = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/bookings", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          credentials: "include"
+        const res = await axios.get("/api/bookings", {
+          withCredentials: true
         });
-        if (!res.ok) throw new Error("Failed to fetch");
-        const data = await res.json();
-        setBookings(data);
+        setBookings(res.data);
       } catch (error) {
         console.log("Error fetching bookings");
       }
@@ -34,20 +29,11 @@ const UserDashboard = () => {
     if (!confirmCancelId) return;
 
     try {
-      const res = await fetch(`http://localhost:5000/api/bookings/${confirmCancelId}/cancel`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        credentials: "include"
-      });
-
-      const data = await res.json();
-      if (!res.ok) {
-        alert(data.message || "Failed to cancel booking");
-        setConfirmCancelId(null);
-        return;
-      }
+      const res = await axios.put(
+        `/api/bookings/${confirmCancelId}/cancel`,
+        {},
+        { withCredentials: true }
+      );
 
       // Refresh list locally
       setBookings((prev) =>
@@ -58,7 +44,7 @@ const UserDashboard = () => {
       setConfirmCancelId(null);
     } catch (error) {
       console.error("Cancellation error:", error);
-      alert("Server error during cancellation");
+      alert(error.response?.data?.message || "Server error during cancellation");
       setConfirmCancelId(null);
     }
   };

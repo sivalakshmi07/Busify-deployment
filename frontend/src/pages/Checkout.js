@@ -4,6 +4,7 @@ import Footer from "../components/Footer";
 import "./Checkout.css";
 import headImg from "../assets/Head.png";
 import "../pages/SeatSelection.css";
+import axios from "../api/axios";
 
 const Checkout = () => {
   const { state } = useLocation();
@@ -50,13 +51,9 @@ const Checkout = () => {
     }
 
     try {
-      const res = await fetch("http://localhost:5000/api/bookings", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
+      const res = await axios.post(
+        "/api/bookings",
+        {
           username,
           busName: bus?.name || "Bus Service",
           from: bus?.from,
@@ -67,14 +64,9 @@ const Checkout = () => {
           seats: selectedSeats,
           passengers,
           totalPrice,
-        }),
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json();
-        alert(errorData.message || "Error saving booking. Seat might be already booked.");
-        return;
-      }
+        },
+        { withCredentials: true }
+      );
 
       navigate("/invoice", {
         state: {
@@ -88,7 +80,7 @@ const Checkout = () => {
       });
     } catch (error) {
       console.error("Payment error:", error);
-      alert("Error saving booking");
+      alert(error.response?.data?.message || "Error saving booking. Seat might be already booked.");
     }
   };
 

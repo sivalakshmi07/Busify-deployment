@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "../api/axios";
 const emptyBus = {
   id: null,
   name: "",
@@ -27,17 +28,16 @@ const AdminDashboard = () => {
 
   /* 📥 FETCH LIVE BUSES */
   useEffect(() => {
-    fetch("http://localhost:5000/api/buses")
-      .then((res) => res.json())
-      .then((data) => setBuses(data))
+    axios.get("/api/buses")
+      .then((res) => setBuses(res.data))
       .catch((err) => console.error("Failed to fetch buses:", err));
   }, []);
 
   /* 🟡 DELETE */
   const deleteBus = async (id) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/buses/${id}`, { method: "DELETE" });
-      if (response.ok) {
+      const response = await axios.delete(`/api/buses/${id}`);
+      if (response.status === 200 || response.status === 204) {
         setBuses(buses.filter((bus) => bus.id !== id));
       }
     } catch (err) {
@@ -76,28 +76,20 @@ const AdminDashboard = () => {
 
     try {
       if (isEdit) {
-        const response = await fetch(`http://localhost:5000/api/buses/${busForm.id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(busForm)
-        });
-        const data = await response.json();
-        if (response.ok) {
-          setBuses(buses.map((b) => (b.id === busForm.id ? data.bus : b)));
-        } else {
-          alert("Error: " + data.message);
+        try {
+          const response = await axios.put(`/api/buses/${busForm.id}`, busForm);
+          setBuses(buses.map((b) => (b.id === busForm.id ? response.data.bus : b)));
+        } catch (error) {
+          alert("Error: " + (error.response?.data?.message || error.message));
+          return;
         }
       } else {
-        const response = await fetch("http://localhost:5000/api/buses", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(busForm)
-        });
-        const data = await response.json();
-        if (response.ok) {
-          setBuses([...buses, data.bus]);
-        } else {
-          alert("Error: " + data.message);
+        try {
+          const response = await axios.post("/api/buses", busForm);
+          setBuses([...buses, response.data.bus]);
+        } catch (error) {
+          alert("Error: " + (error.response?.data?.message || error.message));
+          return;
         }
       }
 

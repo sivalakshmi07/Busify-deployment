@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { showToast } from "../utils/showToast";
+import axios from "../api/axios";
 
 const Register = () => {
   const [username, setUsername] = useState("");
@@ -22,20 +23,10 @@ const Register = () => {
     }
 
     try {
-      const res = await fetch("http://localhost:5000/api/users/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ username, password })
+      const res = await axios.post("/api/users/register", {
+        username,
+        password
       });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        showToast(data.message, "danger");
-        return;
-      }
 
       showToast("Registration successful! Please login.", "success");
 
@@ -49,7 +40,7 @@ const Register = () => {
       loginModal.show();
 
     } catch (error) {
-      showToast("Server error", "danger");
+      showToast(error.response?.data?.message || "Server error", "danger");
     }
   };
 

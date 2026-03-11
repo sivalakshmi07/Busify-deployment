@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import axios from "../api/axios";
 
 const BusResults = () => {
   const navigate = useNavigate();
@@ -23,9 +24,10 @@ const BusResults = () => {
   useEffect(() => {
     const fetchBuses = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/api/buses/search?from=${searchFrom}&to=${searchTo}`);
-        const data = await response.json();
-        setBuses(data || []);
+        const response = await axios.get("/api/buses/search", {
+          params: { from: searchFrom, to: searchTo }
+        });
+        setBuses(response.data || []);
         setLoading(false);
       } catch (error) {
         console.error("Failed to load buses from backend:", error);

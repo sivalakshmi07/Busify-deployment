@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "../api/axios";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -27,24 +28,14 @@ const Login = () => {
 
     /* NORMAL USER LOGIN (Backend) */
     try {
-      const res = await fetch("http://localhost:5000/api/users/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        credentials: "include",
-        body: JSON.stringify({ username, password })
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        alert(data.message);
-        return;
-      }
+      const res = await axios.post(
+        "/api/users/login",
+        { username, password },
+        { withCredentials: true }
+      );
 
       localStorage.setItem("isLoggedIn", "true");
-      localStorage.setItem("username", data.username);
+      localStorage.setItem("username", res.data.username);
       localStorage.removeItem("isAdmin");
 
       const modal = document.getElementById("loginModal");
@@ -54,7 +45,7 @@ const Login = () => {
       navigate("/dashboard");
 
     } catch (error) {
-      alert("Server error");
+      alert(error.response?.data?.message || "Server error");
     }
   };
 

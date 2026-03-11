@@ -5,7 +5,7 @@ import SeatSummary from "../components/SeatSummary";
 import Footer from "../components/Footer";
 import "./SeatSelection.css";
 import headImg from "../assets/Head.png";
-
+import axios from "../api/axios";
 
 
 const SeatSelection = () => {
@@ -25,11 +25,10 @@ const SeatSelection = () => {
     const fetchBookedSeats = async () => {
       if (!bus?.name || !journeyDate) return;
       try {
-        const res = await fetch(`http://localhost:5000/api/bookings/booked-seats?busName=${encodeURIComponent(bus.name)}&date=${encodeURIComponent(journeyDate)}`);
-        const data = await res.json();
-        if (res.ok) {
-          setBookedSeats(data);
-        }
+        const res = await axios.get(`/api/bookings/booked-seats`, {
+          params: { busName: bus.name, date: journeyDate }
+        });
+        setBookedSeats(res.data);
       } catch (e) {
         console.error("Failed to fetch booked seats", e);
       }
